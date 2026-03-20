@@ -6,6 +6,7 @@ import modules.ManageData as ManageData
 from modules.ColourCodes import Colours
 
 random_word = None
+user_guesses = []
 guesses = 6
 
 RED = Colours["Red"]
@@ -21,7 +22,76 @@ VALID_WORD_LIST_PATH = "ValidWords.txt"
 SECRET_KEY = "hehesecretcode"
 KEYBOARD_LAYOUT = ["qwertyuiop↩", "asdfghjkl", "zxcvbnm"]
 
+BEST_STARTER_WORD = "trace"
+
 # INTERAL FUNCTIONS
+
+def _init_wordle_bot(valid_words: list) -> None:
+    lines = [[""] * 5 for _ in range(0, 6)]
+    bot_win = False
+    bot_best_guess = BEST_STARTER_WORD
+    for i in range(0, 6):
+        if i < len(user_guesses):
+            guess = user_guesses[i]
+            print(f"{GREEN}Guess {i + 1}: You played {guess}{RESET}")
+        else:
+            print(f"{GREEN}You've already solved it!{RESET}")
+
+        print(f"{GREEN}Bot would have played {bot_best_guess}{RESET}")
+        lines[i] = list(bot_best_guess)
+        generate_wordle_board(lines, random_word, {})
+        
+        if bot_best_guess == random_word:
+            bot_win = True
+            if len(user_guesses) < (i + 1):
+                print(f"{GREEN}You beat the bot!{RESET}")
+                input(f"{BLUE}Press 'enter' to return to main menu.{RESET}")
+            else:
+                print(f"{RED}Imagine losing to a bot.{RESET}")
+                input(f"{BLUE}Press 'enter' to return to main menu.{RESET}")
+
+            break
+        
+        result, _ = get_letter_colours(lines[i], random_word, {})
+        possiblities = []
+
+        for word in valid_words:
+            meets_criteria = True
+
+            if bot_best_guess == word:
+                meets_criteria = False
+
+            for idx in range(5):
+                letter = lines[i][idx]
+                colour = result[idx]
+
+                if colour == "green":
+                    if word[idx] != letter:
+                        meets_criteria = False
+                        break
+                elif colour == "yellow":
+                    if not (letter in word) or word[idx] == letter:
+                        meets_criteria = False
+                        break
+                elif colour == "grey":
+                    if letter in word:
+                        meets_criteria = False
+                        break
+            
+            if meets_criteria:
+                possiblities.append(word)
+                break
+        
+        if len(possiblities) == 0:
+            bot_best_guess = random.choice(valid_words)
+        else:
+            bot_best_guess = random.choice(possiblities)
+            
+        input(f"{BLUE}Continue?{RESET}")
+    
+    if not bot_win:
+        print(f"{RED}Bot failed to complete Wordle.{RESET}")
+        input(f"{BLUE}Press 'enter' to return to main menu.{RESET}")
 
 def _load_keyboard(letter_states: dict) -> None:
     for i, layer in enumerate(KEYBOARD_LAYOUT):
@@ -59,46 +129,6 @@ def _generate_random_word(valid_words: list) -> str:
 def _make_guess(solution: str, guess: str) -> bool:
     return solution == guess
 
-def _generate_wordle_board(lines: list, word: str, letter_states: dict) -> None:
-    for line in lines:
-        if not any(line):
-            print("-----")
-            continue
-        result = [""] * 5
-        
-        letter_count = {}
-        for letter in word:
-            if letter in letter_count:
-                letter_count[letter] += 1
-            else:
-                letter_count[letter] = 1
-        
-        for i in range(0, 5):
-            if line[i] == word[i]:
-                result[i] = "green"
-                letter_count[line[i]] -= 1
-                letter_states[line[i]] = "green"
-        
-        for i in range(0, 5):
-            if result[i] == "":
-                if line[i] in letter_count and letter_count[line[i]] > 0:
-                    result[i] = "yellow"
-                    letter_count[line[i]] -= 1
-                    letter_states[line[i]] = "yellow"
-                else:
-                    result[i] = "grey"
-                    letter_states[line[i]] = "grey"
-
-        for i in range(0, 5):
-            if result[i] == "green":
-                print(f"{WORDLE_GREEN}{line[i]}{RESET}", end="")
-            elif result[i] == "yellow":
-                print(f"{WORDLE_YELLOW}{line[i]}{RESET}", end="")
-            else:
-                print(f"{WORDLE_GREY}{line[i]}{RESET}", end="")
-        print()
-    return letter_states
-
 def _xor(data: str, key: str):
     return bytes([letter ^ ord(key[i % len(key)]) for i, letter in enumerate(data)])
 
@@ -113,10 +143,10 @@ def _create_game_code(word: str):
     return code
 
 def _get_user_guess(word: str) -> tuple[bool, int]:
-    lines = [["", "", "", "", "", ""] for _ in range(0, 6)]
+    lines = [[""] * 5 for _ in range(0, 6)]
     letter_states = {}
 
-    _generate_wordle_board(lines, word, letter_states)
+    generate_wordle_board(lines, word, letter_states)
     _load_keyboard(letter_states)
 
     for round in range(0, guesses):
@@ -140,10 +170,12 @@ def _get_user_guess(word: str) -> tuple[bool, int]:
             break
 
         lines[round] = list(user_input)
-        letter_states = _generate_wordle_board(lines, word, letter_states)
+        generate_wordle_board(lines, word, letter_states)
+        _, letter_states = get_letter_colours(user_input, random_word, letter_states)
         _load_keyboard(letter_states)
         
         correct = _make_guess(word, user_input)
+        user_guesses.append(user_input)
 
         if correct:
             print(f"{GREEN}You win! The word was {word}.{RESET}")
@@ -152,6 +184,50 @@ def _get_user_guess(word: str) -> tuple[bool, int]:
     return False, 7
 
 # EXTERNAL FUNCTIONS
+
+def generate_wordle_board(lines: list, word: str, letter_states: dict) -> None:
+    for line in lines:
+        if not any(line):
+            print("-----")
+            continue
+        
+        result, _ = get_letter_colours(line, word, letter_states)
+
+        for i in range(0, 5):
+            if result[i] == "green":
+                print(f"{WORDLE_GREEN}{line[i]}{RESET}", end="")
+            elif result[i] == "yellow":
+                print(f"{WORDLE_YELLOW}{line[i]}{RESET}", end="")
+            else:
+                print(f"{WORDLE_GREY}{line[i]}{RESET}", end="")
+        print()
+
+def get_letter_colours(line: list, word: str, letter_states: dict) -> tuple[list, dict]:
+    result = [""] * 5
+    letter_count = {}
+    for letter in word:
+        if letter in letter_count:
+            letter_count[letter] += 1
+        else:
+            letter_count[letter] = 1
+        
+    for i in range(0, 5):
+        if line[i] == word[i]:
+            result[i] = "green"
+            letter_count[line[i]] -= 1
+            letter_states[line[i]] = "green"
+        
+    for i in range(0, 5):
+        if result[i] == "":
+            if line[i] in letter_count and letter_count[line[i]] > 0:
+                result[i] = "yellow"
+                letter_count[line[i]] -= 1
+                letter_states[line[i]] = "yellow"
+            else:
+                result[i] = "grey"
+                letter_states[line[i]] = "grey"
+    
+    return result, letter_states
 
 def create_wordle_game() -> None:  
     custom_word = input(f"{BLUE}Enter your custom word: {RESET}")
@@ -185,13 +261,15 @@ def play_custom_wordle_game() -> None:
     success = _get_user_guess(word)
 
     if not success:
-        print(f"{RED}You lose! The word was {random_word}.{RESET}")
+        print(f"{RED}You lose! The word was {word}.{RESET}")
 
 def init() -> None:
     global random_word
+    global user_guesses
+
     valid_words = _load_words()
     random_word = _generate_random_word(valid_words)
-    #print(random_word)
+    print(random_word)
     success, round = _get_user_guess(random_word)
 
     if not success:
@@ -207,3 +285,9 @@ def init() -> None:
 
         if not success_past_scores or not success_score:
             print(f"{RED}[ERROR] Could not save score to file.{RESET}")
+    
+    do_wordle_bot = input(f"{BLUE}Did you beat the bot? Press 'b' to see. {RESET}") == "b"
+    if do_wordle_bot:
+        _init_wordle_bot(valid_words)
+    
+    user_guesses = []
