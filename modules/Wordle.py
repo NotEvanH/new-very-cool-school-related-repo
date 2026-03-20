@@ -33,7 +33,7 @@ def _load_keyboard(letter_states: dict) -> None:
 
             print(
                 f"{"".join(
-                    [f"""{f"{WORDLE_GREEN}{letter}{RESET}" if letter_state == "green" else f"{WORDLE_YELLOW}{letter}{RESET}" if letter_state == "yellow" else f"{WORDLE_GREY}{letter}{RESET}" if letter_state == "grey" else f"{KEYBOARD_DARK_GREY}{letter}{RESET}"}"""]
+                    [f"""{f"{WORDLE_GREEN}{letter}{RESET}" if letter_state == "green" else f"{WORDLE_YELLOW}{letter}{RESET}" if letter_state == "yellow" else f"{KEYBOARD_DARK_GREY}{letter}{RESET}" if letter_state == "grey" else f"{WORDLE_GREY}{letter}{RESET}"}"""]
                 )}",
                 end=""
             )
@@ -52,7 +52,7 @@ def _load_words() -> list:
         valid_words = ["apple"]
         return valid_words
 
-def _generate_random_word(valid_words) -> str:
+def _generate_random_word(valid_words: list) -> str:
     word = random.choice(valid_words)
     return word
     
@@ -143,9 +143,9 @@ def _get_user_guess(word: str) -> tuple[bool, int]:
         letter_states = _generate_wordle_board(lines, word, letter_states)
         _load_keyboard(letter_states)
         
-        corrent = _make_guess(word, user_input)
+        correct = _make_guess(word, user_input)
 
-        if corrent:
+        if correct:
             print(f"{GREEN}You win! The word was {word}.{RESET}")
             return True, round
     
