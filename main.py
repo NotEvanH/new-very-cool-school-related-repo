@@ -110,9 +110,11 @@ def get_user_choice() -> None:
             print(f"{RED}[ERROR] User is an idiot.{RESET}")
             input(f"{RED}Press 'return' to continue.{RESET}")
 
-if __name__ == "__main__":
-    signal.signal(signal.SIGINT, quit_like_a_loser)
-
+def main() -> None:
     while True:
         load_menu()
         get_user_choice()
+
+if __name__ == "__main__":
+    signal.signal(signal.SIGINT, quit_like_a_loser)
+    main()
