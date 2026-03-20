@@ -17,7 +17,8 @@ def load_menu() -> None:
     3) Show Scores
     4) Create your own Wordle
     5) Play Custom Wordle
-    6) Quit
+    6) Clear Data
+    7) Quit
     {RESET}""")
 
 def init_wordle() -> None:
@@ -69,6 +70,21 @@ def play_custom_wordle_game() -> None:
     print(f"{BLUE}Type '-1' to quit.{RESET}")
     Wordle.play_custom_wordle_game()
 
+def clear_scores() -> None:
+    default_data = {
+        "spelling_bee": {
+            "most_recent_score": "N/A", "past_scores": []
+        },
+        "wordle": {
+            "most_recent_score": "N/A", "past_scores": []
+        }}
+
+    success = ManageData.write_user_data(default_data)
+    if success:
+        print(f"{GREEN}Successfully cleared all past data. Wonder why you felt the need to do that? You musn't be very good at this.{RESET}")
+    else:
+        print(f"{RED}[ERROR] Failed to clear data{RESET}")
+
 def quit_like_a_loser(*_) -> None:
     print(f"{RED}Quit you stupid quitter.{RESET}")
     sys.exit(0)
@@ -87,6 +103,8 @@ def get_user_choice() -> None:
         case "5":
             play_custom_wordle_game()
         case "6":
+            clear_scores()
+        case "7":
             quit_like_a_loser()
         case _:
             print(f"{RED}[ERROR] User is an idiot.{RESET}")
