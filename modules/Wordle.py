@@ -14,16 +14,31 @@ GREEN = Colours["Green"]
 WORDLE_GREEN = Colours["WordleGreen"]
 WORDLE_GREY = Colours["WordleGrey"]
 WORDLE_YELLOW = Colours["WordleYellow"]
+KEYBOARD_DARK_GREY = Colours["KeyboardDarkGrey"]
 RESET = Colours["Reset"]
 
 VALID_WORD_LIST_PATH = "ValidWords.txt"
 SECRET_KEY = "hehesecretcode"
-KEYBOARD_LAYOUT = ["qwertyuiop", "asdfghjkl", "zxcvbnm"]
+KEYBOARD_LAYOUT = ["qwertyuiop↩", "asdfghjkl", "zxcvbnm"]
 
 # INTERAL FUNCTIONS
 
-def _load_keyboard(word: str, letter_states: dict) -> None:
-    pass
+def _load_keyboard(letter_states: dict) -> None:
+    for i, layer in enumerate(KEYBOARD_LAYOUT):
+        print(i * " ", end="")
+        for letter in layer:
+            letter_state = None
+            if letter in letter_states:
+                letter_state = letter_states[letter]
+
+            print(
+                f"{"".join(
+                    [f"""{f"{WORDLE_GREEN}{letter}{RESET}" if letter_state == "green" else f"{WORDLE_YELLOW}{letter}{RESET}" if letter_state == "yellow" else f"{WORDLE_GREY}{letter}{RESET}" if letter_state == "grey" else f"{KEYBOARD_DARK_GREY}{letter}{RESET}"}"""]
+                )}",
+                end=""
+            )
+
+        print()
 
 def _load_words() -> list:
     try:
@@ -44,7 +59,7 @@ def _generate_random_word(valid_words) -> str:
 def _make_guess(solution: str, guess: str) -> bool:
     return solution == guess
 
-def _generate_wordle_board(lines: list, word: str) -> None:
+def _generate_wordle_board(lines: list, word: str, letter_states: dict) -> None:
     for line in lines:
         if not any(line):
             print("-----")
@@ -62,14 +77,17 @@ def _generate_wordle_board(lines: list, word: str) -> None:
             if line[i] == word[i]:
                 result[i] = "green"
                 letter_count[line[i]] -= 1
+                letter_states[line[i]] = "green"
         
         for i in range(0, 5):
             if result[i] == "":
                 if line[i] in letter_count and letter_count[line[i]] > 0:
                     result[i] = "yellow"
                     letter_count[line[i]] -= 1
+                    letter_states[line[i]] = "yellow"
                 else:
                     result[i] = "grey"
+                    letter_states[line[i]] = "grey"
 
         for i in range(0, 5):
             if result[i] == "green":
@@ -79,6 +97,7 @@ def _generate_wordle_board(lines: list, word: str) -> None:
             else:
                 print(f"{WORDLE_GREY}{line[i]}{RESET}", end="")
         print()
+    return letter_states
 
 def _xor(data: str, key: str):
     return bytes([letter ^ ord(key[i % len(key)]) for i, letter in enumerate(data)])
@@ -95,8 +114,10 @@ def _create_game_code(word: str):
 
 def _get_user_guess(word: str) -> tuple[bool, int]:
     lines = [["", "", "", "", "", ""] for _ in range(0, 6)]
-    _generate_wordle_board(lines, word)
     letter_states = {}
+
+    _generate_wordle_board(lines, word, letter_states)
+    _load_keyboard(letter_states)
 
     for round in range(0, guesses):
         user_input = None
@@ -119,11 +140,8 @@ def _get_user_guess(word: str) -> tuple[bool, int]:
             break
 
         lines[round] = list(user_input)
-        _generate_wordle_board(lines, word)
-
-        for letter in lines:
-            if not (letter in letter_states):
-                letter_states[letter] = ""
+        letter_states = _generate_wordle_board(lines, word, letter_states)
+        _load_keyboard(letter_states)
         
         corrent = _make_guess(word, user_input)
 
@@ -160,7 +178,7 @@ def play_custom_wordle_game() -> None:
         unencrypted_code = _xor(decoded_code, SECRET_KEY)
         decompressed = zlib.decompress(unencrypted_code).decode()
         decoded_code = json.loads(decompressed)
-    except Exception as e:
+    except:
         print(f"{RED}[ERROR] Please enter a valid code.{RESET}")
 
     word = decoded_code["word"]
@@ -173,7 +191,7 @@ def init() -> None:
     global random_word
     valid_words = _load_words()
     random_word = _generate_random_word(valid_words)
-    print(random_word)
+    #print(random_word)
     success, round = _get_user_guess(random_word)
 
     if not success:

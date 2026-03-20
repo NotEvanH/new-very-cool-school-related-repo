@@ -4,7 +4,6 @@ import modules.ManageData as ManageData
 from modules.ColourCodes import Colours
 import signal
 import sys
-import time
 
 RED = Colours["Red"]
 BLUE = Colours["Blue"]
@@ -45,16 +44,16 @@ def show_scores() -> None:
     if len(spelling_bee_past_scores) != 0:
         spelling_bee_average = round(sum([int(score) for score in spelling_bee_past_scores]) / len(spelling_bee_past_scores), 2)
 
-    print(f"{GREEN}Spelling Bee:{RESET}")
-    print(f"{GREEN}   - Average Score: {spelling_bee_average}")
-    print(f"{GREEN}   - Most Recent Score: {spelling_bee_most_recent_score or "N/A"}")
-
     wordle_most_recent_score = wordle_data["most_recent_score"]
     wordle_past_scores = wordle_data["past_scores"]
     wordle_average = "N/A"
 
     if len(wordle_past_scores) != 0:
         wordle_average = round(sum([int(score) for score in wordle_past_scores]) / len(wordle_past_scores), 2)
+
+    print(f"{GREEN}Spelling Bee:{RESET}")
+    print(f"{GREEN}   - Average Score: {spelling_bee_average}")
+    print(f"{GREEN}   - Most Recent Score: {spelling_bee_most_recent_score or "N/A"}")
 
     print(f"{GREEN}Wordle:{RESET}")
     print(f"{GREEN}   - Average Score (If user fails, score is set to seven by default): {wordle_average}")
