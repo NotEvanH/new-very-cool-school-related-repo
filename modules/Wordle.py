@@ -142,7 +142,7 @@ def _create_game_code(word: str):
 
     return code
 
-def _get_user_guess(word: str) -> tuple[bool, int]:
+def _get_user_guess(word: str, valid_words: list) -> tuple[bool, int]:
     lines = [[""] * 5 for _ in range(0, 6)]
     letter_states = {}
 
@@ -160,7 +160,7 @@ def _get_user_guess(word: str) -> tuple[bool, int]:
                     should_quit = True
                     break
 
-                if len(user_input) != 5:
+                if len(user_input) != 5 or not (user_input in valid_words):
                     raise ValueError
             except ValueError:
                 user_input = None
@@ -244,6 +244,7 @@ def create_wordle_game() -> None:
     print(f"{GREEN}Share this code with your friends for them to play: {game_code}{RESET}")
 
 def play_custom_wordle_game() -> None:
+    valid_words = _load_words()
     print(f"{BLUE}Please note that custom games will award you no points.{RESET}")
     code = input(f"{BLUE}Enter enter the custom code: {RESET}")
     if code == "-1":
@@ -258,7 +259,7 @@ def play_custom_wordle_game() -> None:
         print(f"{RED}[ERROR] Please enter a valid code.{RESET}")
 
     word = decoded_code["word"]
-    success = _get_user_guess(word)
+    success = _get_user_guess(word, valid_words)
 
     if not success:
         print(f"{RED}You lose! The word was {word}.{RESET}")
@@ -269,8 +270,8 @@ def init() -> None:
 
     valid_words = _load_words()
     random_word = _generate_random_word(valid_words)
-    print(random_word)
-    success, round = _get_user_guess(random_word)
+    #print(random_word)
+    success, round = _get_user_guess(random_word, valid_words)
 
     if not success:
         print(f"{RED}You lose! The word was {random_word}.{RESET}")
