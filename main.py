@@ -4,6 +4,7 @@ import modules.ManageData as ManageData
 from modules.ColourCodes import Colours
 import signal
 import sys
+import os
 
 RED = Colours["Red"]
 BLUE = Colours["Blue"]
@@ -89,8 +90,14 @@ def quit_like_a_loser(*_) -> None:
     print(f"{RED}Quit you stupid quitter.{RESET}")
     sys.exit(0)
 
+def gon_easter_egg() -> None:
+    os.system("cls" if os.name == "nt" else "clear")
+    print("gon ", end="", flush=True)
+    while True:
+        pass
+
 def get_user_choice() -> None:
-    user_input = input(f"{BLUE}> {RESET}")
+    user_input = input(f"{BLUE}> {RESET}").lower()
     match user_input:
         case "1":
             init_wordle()
@@ -106,6 +113,8 @@ def get_user_choice() -> None:
             clear_scores()
         case "7":
             quit_like_a_loser()
+        case "gon":
+            gon_easter_egg()
         case _:
             print(f"{RED}[ERROR] User is an idiot.{RESET}")
             input(f"{RED}Press 'return' to continue.{RESET}")
