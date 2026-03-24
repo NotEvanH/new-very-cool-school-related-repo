@@ -1,7 +1,9 @@
 import modules.Wordle as Wordle
 import modules.SpellingBee as SpellingBee
 import modules.ManageData as ManageData
+import modules.LoadingScreen as LoadingScreen
 from modules.ColourCodes import Colours
+import random
 import signal
 import sys
 import os
@@ -120,6 +122,10 @@ def get_user_choice() -> None:
             input(f"{RED}Press 'return' to continue.{RESET}")
 
 def main() -> None:
+    loading_messages = ["hello.", "by javelinwebdesigns.com", "proud supporter of GON", "welcome to my game.", "nyt replication"]
+    random_message = random.choice(loading_messages)
+    LoadingScreen.loading_screen(random_message)
+    
     while True:
         load_menu()
         get_user_choice()

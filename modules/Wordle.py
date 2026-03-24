@@ -35,7 +35,7 @@ def _init_wordle_bot(valid_words: list) -> None:
             guess = user_guesses[i]
             print(f"{GREEN}Guess {i + 1}: You played {guess}{RESET}")
         else:
-            print(f"{GREEN}You've already solved it!{RESET}")
+            print(f"{GREEN}You'd already finish.{RESET}")
 
         print(f"{GREEN}Bot would have played {bot_best_guess}{RESET}")
         lines[i] = list(bot_best_guess)
@@ -142,7 +142,7 @@ def _create_game_code(word: str):
 
     return code
 
-def _get_user_guess(word: str, valid_words: list) -> tuple[bool, int]:
+def _get_user_guesses(word: str, valid_words: list) -> tuple[bool, int]:
     lines = [[""] * 5 for _ in range(0, 6)]
     letter_states = {}
 
@@ -164,7 +164,7 @@ def _get_user_guess(word: str, valid_words: list) -> tuple[bool, int]:
                     raise ValueError
             except ValueError:
                 user_input = None
-                print(f"{RED}[ERROR] Ensure guess is five letters long.{RESET}")
+                print(f"{RED}[ERROR] Ensure guess is five letters long and word is valid.{RESET}")
 
         if should_quit == True:
             break
@@ -259,7 +259,7 @@ def play_custom_wordle_game() -> None:
         print(f"{RED}[ERROR] Please enter a valid code.{RESET}")
 
     word = decoded_code["word"]
-    success = _get_user_guess(word, valid_words)
+    success = _get_user_guesses(word, valid_words)
 
     if not success:
         print(f"{RED}You lose! The word was {word}.{RESET}")
@@ -269,9 +269,8 @@ def init() -> None:
     global user_guesses
 
     valid_words = _load_words()
-    random_word = _generate_random_word(valid_words)
-    #print(random_word)
-    success, round = _get_user_guess(random_word, valid_words)
+    random_word = _generate_random_word(valid_words)   
+    success, round = _get_user_guesses(random_word, valid_words)
 
     if not success:
         print(f"{RED}You lose! The word was {random_word}.{RESET}")
