@@ -30,16 +30,6 @@ def get_value(game: str, key: str) -> int | None:
     except Exception:
         return None
 
-def get_game_average(game: str) -> int | None:
-    try:
-        past_scores = get_value(game, "past_scores")
-        if past_scores == None:
-            raise Exception
-        
-        return sum(past_scores) / len(past_scores)
-    except:
-        return None
-
 def write_value(game: str, key: str, new_value: str) -> bool:
     try:
         data = get_user_data()
