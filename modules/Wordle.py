@@ -43,12 +43,8 @@ def _init_wordle_bot(valid_words: list) -> None:
         
         if bot_best_guess == random_word:
             bot_win = True
-            if len(user_guesses) < (i + 1):
-                print(f"{GREEN}You beat the bot!{RESET}")
-                input(f"{BLUE}Press 'enter' to return to main menu.{RESET}")
-            else:
-                print(f"{RED}Imagine losing to a bot.{RESET}")
-                input(f"{BLUE}Press 'enter' to return to main menu.{RESET}")
+            print(f"{GREEN}Bot completed Wordle in {i} guesses.{RESET}")
+            input(f"{BLUE}Press 'enter' to return to main menu.{RESET}")
 
             break
         
@@ -64,6 +60,10 @@ def _init_wordle_bot(valid_words: list) -> None:
             for idx in range(5):
                 letter = lines[i][idx]
                 colour = result[idx]
+
+                if word in possiblities:
+                    meets_criteria = False
+                    break
 
                 if colour == "green":
                     if word[idx] != letter:
@@ -171,7 +171,7 @@ def _get_user_guesses(word: str, valid_words: list) -> tuple[bool, int]:
 
         lines[round] = list(user_input)
         generate_wordle_board(lines, word, letter_states)
-        _, letter_states = get_letter_colours(user_input, random_word, letter_states)
+        _, letter_states = get_letter_colours(user_input, word, letter_states)
         _load_keyboard(letter_states)
         
         correct = _make_guess(word, user_input)
