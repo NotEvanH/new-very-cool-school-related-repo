@@ -32,36 +32,31 @@ def init_spelling_bee() -> None:
     print(f"{BLUE}Type '-1' to quit.{RESET}")
     SpellingBee.init()
 
+def output_game_scores(game_name: str) -> None:
+    data = ManageData.get_user_data()
+    if not data:
+        print(f"{RED}[ERROR] Failed to load user scores.{RESET}")
+        return
+
+    game_data = data[game_name]
+    past_scores = game_data["past_scores"]
+    most_recent_score = game_data["most_recent_score"]
+    average = round(sum([int(score) for score in past_scores]) / len(past_scores), 2) if len(past_scores) != 0 else "N/A"
+
+    formatted_game_name = game_name.replace("_", " ").title()
+
+    print(f"{GREEN}{formatted_game_name}:{RESET}")
+    print(f"{GREEN} - Average: {average}")
+    print(f"{GREEN} - Most Recent Score: {most_recent_score}")
+
 def show_scores() -> None:
     data = ManageData.get_user_data()
     if not data:
         print(f"{RED}[ERROR] Failed to load user scores.{RESET}")
         return
     
-    spelling_bee_data = data["spelling_bee"]
-    wordle_data = data["wordle"]
-
-    spelling_bee_most_recent_score = spelling_bee_data["most_recent_score"]
-    spelling_bee_past_scores = spelling_bee_data["past_scores"]
-    spelling_bee_average = "N/A"
-
-    if len(spelling_bee_past_scores) != 0:
-        spelling_bee_average = round(sum([int(score) for score in spelling_bee_past_scores]) / len(spelling_bee_past_scores), 2)
-
-    wordle_most_recent_score = wordle_data["most_recent_score"]
-    wordle_past_scores = wordle_data["past_scores"]
-    wordle_average = "N/A"
-
-    if len(wordle_past_scores) != 0:
-        wordle_average = round(sum([int(score) for score in wordle_past_scores]) / len(wordle_past_scores), 2)
-
-    print(f"{GREEN}Spelling Bee:{RESET}")
-    print(f"{GREEN}   - Average Score: {spelling_bee_average}")
-    print(f"{GREEN}   - Most Recent Score: {spelling_bee_most_recent_score or "N/A"}")
-
-    print(f"{GREEN}Wordle:{RESET}")
-    print(f"{GREEN}   - Average Score (If user fails, score is set to seven by default): {wordle_average}")
-    print(f"{GREEN}   - Most Recent Score: {wordle_most_recent_score or "N/A"}")
+    output_game_scores("spelling_bee")
+    output_game_scores("wordle")
 
     input(f"{GREEN}\nPress 'return' to continue.{RESET}")
 
