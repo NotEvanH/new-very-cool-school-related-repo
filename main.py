@@ -122,7 +122,7 @@ def get_user_choice() -> None:
             input(f"{RED}Press 'return' to continue.{RESET}")
 
 def main() -> None:
-    loading_messages = ["hello.", "by javelinwebdesigns.com", "proud supporter of GON", "welcome to my game.", "nyt replication"]
+    loading_messages = ["hello.", "by javelinwebdesigns.com", "proud supporter of GON", "welcome to my game.", "nyt replica", "cheating is bad.", "spelling bee kinda geeked."]
     random_message = random.choice(loading_messages)
     LoadingScreen.loading_screen(random_message)
     
