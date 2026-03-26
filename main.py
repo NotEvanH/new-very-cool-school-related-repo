@@ -49,6 +49,10 @@ def output_game_scores(game_name: str) -> None:
     print(f"{GREEN} - Average: {average}")
     print(f"{GREEN} - Most Recent Score: {most_recent_score}")
 
+    if "winstreak" in game_data:
+        print(f"{GREEN} - Current Winstreak: {game_data["winstreak"]}{RESET}")
+        print(f"{GREEN} - Highest Winstreak: {game_data["highest_winstreak"]}{RESET}")
+
 def show_scores() -> None:
     data = ManageData.get_user_data()
     if not data:
@@ -74,7 +78,7 @@ def clear_scores() -> None:
             "most_recent_score": "N/A", "past_scores": []
         },
         "wordle": {
-            "most_recent_score": "N/A", "past_scores": []
+            "most_recent_score": "N/A", "past_scores": [], "winstreak": 0, "highest_winstreak": 0
         }}
 
     success = ManageData.write_user_data(default_data)

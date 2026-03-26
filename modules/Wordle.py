@@ -30,12 +30,13 @@ def _init_wordle_bot(valid_words: list) -> None:
     lines = [[""] * 5 for _ in range(0, 6)]
     bot_win = False
     bot_best_guess = BEST_STARTER_WORD
+    past_bot_guesses = []
     for i in range(0, 6):
         if i < len(user_guesses):
             guess = user_guesses[i]
             print(f"{GREEN}Guess {i + 1}: You played {guess}{RESET}")
         else:
-            print(f"{GREEN}You'd already finish.{RESET}")
+            print(f"{GREEN}You'd already finished.{RESET}")
 
         print(f"{GREEN}Bot would have played {bot_best_guess}{RESET}")
         lines[i] = list(bot_best_guess)
@@ -43,7 +44,7 @@ def _init_wordle_bot(valid_words: list) -> None:
         
         if bot_best_guess == random_word:
             bot_win = True
-            print(f"{GREEN}Bot completed Wordle in {i} guesses.{RESET}")
+            print(f"{GREEN}Bot completed Wordle in {i + 1} guesses.{RESET}")
             input(f"{BLUE}Press 'enter' to return to main menu.{RESET}")
 
             break
@@ -61,7 +62,7 @@ def _init_wordle_bot(valid_words: list) -> None:
                 letter = lines[i][idx]
                 colour = result[idx]
 
-                if word in possiblities:
+                if word in bot_best_guess:
                     meets_criteria = False
                     break
 
@@ -86,6 +87,8 @@ def _init_wordle_bot(valid_words: list) -> None:
             bot_best_guess = random.choice(valid_words)
         else:
             bot_best_guess = random.choice(possiblities)
+        
+        past_bot_guesses.append(bot_best_guess)
             
         input(f"{BLUE}Continue?{RESET}")
     
@@ -270,23 +273,38 @@ def init() -> None:
 
     valid_words = _load_words()
     random_word = _generate_random_word(valid_words)   
+    print(random_word)
     success, round = _get_user_guesses(random_word, valid_words)
+
+    winstreak = ManageData.get_value("wordle", "winstreak")
+    highest_winstreak = ManageData.get_value("wordle", "highest_winstreak")
 
     if not success:
         print(f"{RED}You lose! The word was {random_word}.{RESET}")
         success_score = ManageData.write_value("wordle", "most_recent_score", "7")
         success_past_scores = ManageData.update_past_scores("wordle", "7")
+        success_winstreak = ManageData.write_value("wordle", "winstreak", 0)
 
-        if not success_past_scores or not success_score:
+        if not success_past_scores or not success_score or not success_winstreak:
             print(f"{RED}[ERROR] Could not save score to file.{RESET}")
+
+        if winstreak > highest_winstreak:
+            if not ManageData.write_value("wordle", "highest_winstreak", winstreak):
+                print(f"{RED}[ERROR] Could not save score to file.{RESET}")
     else:
         success_score = ManageData.write_value("wordle", "most_recent_score", f"{round + 1}/6")
         success_past_scores = ManageData.update_past_scores("wordle", f"{round + 1}")
+        success_winstreak = ManageData.write_value("wordle", "winstreak", winstreak + 1)
 
         if not success_past_scores or not success_score:
             print(f"{RED}[ERROR] Could not save score to file.{RESET}")
+        
+        if int(winstreak + 1) >= int(highest_winstreak):
+            print("dsgsjdng")
+            if not ManageData.write_value("wordle", "highest_winstreak", winstreak + 1):
+                print(f"{RED}[ERROR] Could not save score to file.{RESET}")
     
-    do_wordle_bot = input(f"{BLUE}Did you beat the bot? Press 'b' to see. {RESET}") == "b"
+    do_wordle_bot = input(f"{BLUE}Did you beat the bot? Press 'b' to see. {RESET}").lower() == "b"
     if do_wordle_bot:
         _init_wordle_bot(valid_words)
     
