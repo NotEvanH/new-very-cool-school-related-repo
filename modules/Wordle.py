@@ -82,7 +82,6 @@ def _init_wordle_bot(valid_words: list) -> None:
             
             if meets_criteria:
                 possiblities.append(word)
-                break
         
         if len(possiblities) == 0:
             bot_best_guess = random.choice(valid_words)
