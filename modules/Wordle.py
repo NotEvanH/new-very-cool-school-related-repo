@@ -32,7 +32,6 @@ def _init_wordle_bot(valid_words: list) -> None:
     bot_best_guess = BEST_STARTER_WORD
     past_bot_guesses = [BEST_STARTER_WORD]
     for i in range(0, 6):
-        print(past_bot_guesses)
         if i < len(user_guesses):
             guess = user_guesses[i]
             print(f"{GREEN}Guess {i + 1}: You played {guess}{RESET}")
