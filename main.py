@@ -98,7 +98,7 @@ def gon_easter_egg() -> None:
         pass
 
 def get_user_choice() -> None:
-    user_input = input(f"{BLUE}> {RESET}").lower()
+    user_input = input(f"{BLUE}> {RESET}").strip()
     match user_input:
         case "1":
             init_wordle()
