@@ -144,7 +144,7 @@ def _create_game_code(word: str):
 
     return code
 
-def _get_user_guesses(word: str, valid_words: list) -> tuple[bool, int]:
+def _get_user_guesses(word: str, valid_words: list, is_custom_game: bool) -> tuple[bool, int]:
     lines = [[""] * 5 for _ in range(0, 6)]
     letter_states = {}
 
@@ -162,7 +162,10 @@ def _get_user_guesses(word: str, valid_words: list) -> tuple[bool, int]:
                     should_quit = True
                     break
 
-                if len(user_input) != 5 or not (user_input in valid_words):
+                if len(user_input) != 5:
+                    raise ValueError
+                
+                if not is_custom_game and not (user_input in valid_words):
                     raise ValueError
             except ValueError:
                 user_input = None
@@ -261,7 +264,7 @@ def play_custom_wordle_game() -> None:
         print(f"{RED}[ERROR] Please enter a valid code.{RESET}")
 
     word = decoded_code["word"]
-    success = _get_user_guesses(word, valid_words)
+    success = _get_user_guesses(word, valid_words, True)
 
     if not success:
         print(f"{RED}You lose! The word was {word}.{RESET}")
@@ -272,7 +275,7 @@ def init() -> None:
 
     valid_words = _load_words()
     random_word = _generate_random_word(valid_words)   
-    success, round = _get_user_guesses(random_word, valid_words)
+    success, round = _get_user_guesses(random_word, valid_words, False)
 
     winstreak = ManageData.get_value("wordle", "winstreak")
     highest_winstreak = ManageData.get_value("wordle", "highest_winstreak")
