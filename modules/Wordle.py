@@ -62,10 +62,6 @@ def _init_wordle_bot(valid_words: list) -> None:
                 letter = lines[i][idx]
                 colour = result[idx]
 
-                if word in bot_best_guess:
-                    meets_criteria = False
-                    break
-
                 if colour == "green":
                     if word[idx] != letter:
                         meets_criteria = False
