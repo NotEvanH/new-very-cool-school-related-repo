@@ -80,23 +80,12 @@ def play_custom_wordle_game() -> None:
     Wordle.play_custom_wordle_game()
 
 def clear_scores() -> None:
-    # Creates a Python dictionary replicating the default data stored in the user_data.json file
-    default_data = {
-        "spelling_bee": {
-            "most_recent_score": "N/A", "past_scores": []
-        },
-        "wordle": {
-            "most_recent_score": "N/A", "past_scores": [], "winstreak": 0, "highest_winstreak": 0
-        }}
-
-    # Writes the data to the user_data.json file
-    success = ManageData.write_user_data(default_data)
-
-    # Error managing for if data failed to write
-    if success:
+    try:
+        os.remove("user_data.db")
         print(f"{GREEN}Successfully cleared all past data. Wonder why you felt the need to do that? You musn't be very good at this.{RESET}")
-    else:
+    except:
         print(f"{RED}[ERROR] Failed to clear data{RESET}")
+        
 
 def quit_like_a_loser(*_) -> None:
     print(f"{RED}Quit you stupid quitter.{RESET}") # Give nice print message
