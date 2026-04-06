@@ -5,10 +5,11 @@ import json
 import modules.ManageData as ManageData
 from modules.ColourCodes import Colours
 
-random_word = None
-user_guesses = []
-guesses = 6
+random_word = None # Randomly selected Wordle word will be assigned to this global variable. I wasn't allowed to use a class here, but if I could I would
+user_guesses = [] # This list will be updated with the user's guesses each round
+guesses = 6 # Dictates how many guesses the user is given. In a typically Wordle game, that's six guesses
 
+# Yay! Colours.
 RED = Colours["Red"]
 BLUE = Colours["Blue"]
 GREEN = Colours["Green"]
@@ -18,30 +19,39 @@ WORDLE_YELLOW = Colours["WordleYellow"]
 KEYBOARD_DARK_GREY = Colours["KeyboardDarkGrey"]
 RESET = Colours["Reset"]
 
-VALID_WORD_LIST_PATH = "ValidWords.txt"
-SECRET_KEY = "hehesecretcode"
-KEYBOARD_LAYOUT = ["qwertyuiop↩", "asdfghjkl", "zxcvbnm"]
+VALID_WORD_LIST_PATH = "ValidWords.txt" # File path to the list housing all the valid Wordle words (externally sourced)
+SECRET_KEY = "hehesecretcode" # Secret code for generating custom Wordle games with xor function
+KEYBOARD_LAYOUT = ["qwertyuiop↩", "asdfghjkl", "zxcvbnm"] # Keyboard layout where each string is an individual line on a typical keyboard
 
-BEST_STARTER_WORD = "trace"
+BEST_STARTER_WORD = "trace" # For Wordle bot's reference, this is the word it will always guess first
 
 # INTERAL FUNCTIONS
 
+# Function for handling Wordle bot
 def _init_wordle_bot(valid_words: list) -> None:
-    lines = [[""] * 5 for _ in range(0, 6)]
-    bot_win = False
-    bot_best_guess = BEST_STARTER_WORD
-    past_bot_guesses = [BEST_STARTER_WORD]
-    for i in range(0, 6):
+    lines = [[""] * 5 for _ in range(0, 6)] # Creates an empty board using lists
+    bot_win = False # Variable to store whether the bot has won the game
+    bot_best_guess = BEST_STARTER_WORD # Creates a variable that stores the bot's best guess for that round
+    past_bot_guesses = [BEST_STARTER_WORD] # A list of the bot's past guesses to avoid it guessing words it already knows are incorrect
+
+    for i in range(0, guesses):
+        # If statement to check if the user had already completed the Wordle or not. Done through comparing the round the bot is currently up to with the length of the list storing all of the user's guesses
         if i < len(user_guesses):
+            # If the user was still playing in this round, their guess will also be outputted
             guess = user_guesses[i]
             print(f"{GREEN}Guess {i + 1}: You played {guess}{RESET}")
         else:
+            # Alternatively, the program will just simply say they have already finished
             print(f"{GREEN}You'd already finished.{RESET}")
 
+        # The program prints that the bot would have played that round
         print(f"{GREEN}Bot would have played {bot_best_guess}{RESET}")
+        
+        # Generates a Wordle board based on this information using the generate_wordle_board function
         lines[i] = list(bot_best_guess)
         generate_wordle_board(lines, random_word, {})
         
+        # If the bot's guess was equal to the randomly selected word, then the bot has won, and the loop can be broken
         if bot_best_guess == random_word:
             bot_win = True
             print(f"{GREEN}Bot completed Wordle in {i + 1} guesses.{RESET}")
@@ -49,51 +59,60 @@ def _init_wordle_bot(valid_words: list) -> None:
 
             break
         
-        result, _ = get_letter_colours(lines[i], random_word, {})
-        possiblities = []
+        result, _ = get_letter_colours(lines[i], random_word, {}) # Calls get_letter_colours function to get list showing the 'colour' of each letter.
+        possiblities = [] # Creates a list where all of the bot's possible guesses will be stored
 
+        # Loops through every valid word to see if it's meets the bot's critera of a word is should play
         for word in valid_words:
-            meets_criteria = True
+            meets_criteria = True # Init a variable which is set to True by default. If the word doesn't meet any of the bot's requirements, this variable will be set to False
             
-            if word in past_bot_guesses:
+            if word in past_bot_guesses: # If the word is in the past_bot_guesses list, then it is invalid because the bot has already played it before
                 meets_criteria = False
-
+            
             for idx in range(5):
-                letter = lines[i][idx]
-                colour = result[idx]
+                letter = lines[i][idx] # Gets the letter at that certain index
+                colour = result[idx] # Gets the colour of that letter
 
                 if colour == "green":
+                    # If the colour was green, and the letter that was green doesn't exist in the word from this iteration, it is invalid
                     if word[idx] != letter:
                         meets_criteria = False
                         break
                 elif colour == "yellow":
+                    # If the colour was yellow, and the letter in either not in the word or is in the right position, it is also invalid
                     if not (letter in word) or word[idx] == letter:
                         meets_criteria = False
                         break
                 elif colour == "grey":
+                    # If the colour was grey, and that letter exists in the word, then it is invalid
                     if letter in word:
                         meets_criteria = False
                         break
             
+            # If the meets_criteria variable is still True after passing through the checks, it is added to the bot's list of possiblities
             if meets_criteria:
                 possiblities.append(word)
         
+        # If there were no possibilities (which should only happens if the code bugs, but it can (and most likely will) happen), then a random word is selected from the whole valid_words list
         if len(possiblities) == 0:
             bot_best_guess = random.choice(valid_words)
         else:
-            bot_best_guess = random.choice(possiblities)
+            bot_best_guess = random.choice(possiblities) # Alternatively, the bot selects a random word from the list of possiblities
         
-        past_bot_guesses.append(bot_best_guess)
+        past_bot_guesses.append(bot_best_guess) # The bot's new guess will now be append to the bot's past guesses list
             
         input(f"{BLUE}Continue?{RESET}")
     
-    if not bot_win:
+    if not bot_win: # If the bot did not win, the following prints are outputted
         print(f"{RED}Bot failed to complete Wordle.{RESET}")
         input(f"{BLUE}Press 'enter' to return to main menu.{RESET}")
 
 def _load_keyboard(letter_states: dict) -> None:
+    # Loops through each layer of the previously declared keyboard layout
     for i, layer in enumerate(KEYBOARD_LAYOUT):
-        print(i * " ", end="")
+        print(i * " ", end="") # Prints some ornamentary spaces to make the keyboard look indented like a real keyboard
+
+        # Loops through each letter in the layer of letters to change their colour based on the user's prior guesses
         for letter in layer:
             letter_state = None
             if letter in letter_states:
