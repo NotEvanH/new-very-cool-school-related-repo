@@ -166,12 +166,24 @@ def _get_user_guesses(word: str, valid_words: list, is_custom_game: bool) -> tup
     generate_wordle_board(lines, word, letter_states)
     _load_keyboard(letter_states)
 
+    can_use_hint = True
+
     for round in range(0, guesses):
         user_input = None
         should_quit = False
         while user_input == None:
             try:
                 user_input = input(f"{BLUE}Enter thine guess: {RESET}").lower()
+                    
+                if user_input == "-2" and can_use_hint:
+                    can_use_hint = False
+                    hint = _get_hint(word)
+                    print(f"{GREEN}Revealed Letter: {hint}{RESET}")
+
+                    user_input = input(f"{BLUE}Enter thine guess: {RESET}").lower()
+                
+                if user_input == "-2":
+                    raise Exception
                 
                 if user_input == "-1":
                     should_quit = True
@@ -185,6 +197,9 @@ def _get_user_guesses(word: str, valid_words: list, is_custom_game: bool) -> tup
             except ValueError:
                 user_input = None
                 print(f"{RED}[ERROR] Ensure guess is five letters long and word is valid.{RESET}")
+            except Exception:
+                print(f"{RED}[ERROR] You've already used your hint.{RESET}")
+                user_input = None
 
         if should_quit == True:
             break
@@ -202,6 +217,9 @@ def _get_user_guesses(word: str, valid_words: list, is_custom_game: bool) -> tup
             return True, round
     
     return False, 7
+
+def _get_hint(word: str) -> str:
+    return random.choice(word)
 
 # EXTERNAL FUNCTIONS
 
