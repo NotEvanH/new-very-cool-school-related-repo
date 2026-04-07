@@ -91,7 +91,7 @@ python main.py
 - [ ] Multi-language support
     - [ ] German
     - [ ] Italian
-- [ ] Wordle Hints
+- [X] Wordle Hints
 - [ ] Spelling Bee Letters Reshuffle
 
 ## Creator Information
