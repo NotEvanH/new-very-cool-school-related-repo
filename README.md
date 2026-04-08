@@ -40,7 +40,7 @@ Core Features:
 * Storing data
 * Obviously the aforementioned games
 
-<p align="right">(<a href="#readme-top"></a>)</p>
+<p align="right">(<a href="#readme-top">Return to top</a>)</p>
 
 ## Built With
 
@@ -49,7 +49,7 @@ The assignment outline states that the project should be made with Python. Howev
 * ![Python](https://img.shields.io/badge/python-3670A0?style=for-the-badge&logo=python&logoColor=ffdd54)
 * ![SQL](https://img.shields.io/badge/sql-597cc2?style=for-the-badge&logo=mysql&logoColor=ffffff)
 
-<p align="right">(<a href="#readme-top"></a>)</p>
+<p align="right">(<a href="#readme-top">Return to top</a>)</p>
 
 ## Getting Started
 
@@ -78,7 +78,7 @@ e.g.
 python main.py
 ```
 
-<p align="right">(<a href="#readme-top"></a>)</p>
+<p align="right">(<a href="#readme-top">Return to top</a>)</p>
 
 ## Roadmap
 
