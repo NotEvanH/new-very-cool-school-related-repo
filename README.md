@@ -23,7 +23,6 @@
             </ul>
         </li>
         <li><a href="#roadmap">Roadmap</a></li>
-        <li><a href="#license">License</a></li>
         <li><a href="#creator-information">Creator Information</a></li>
         <li><a href="#acknowledgments">Acknowledgments</a></li>
     </ol>
@@ -88,11 +87,11 @@ python main.py
 - [X] Create a simple version of WordleBot to allow user's to assess their gameplay in comparison to the bot's
 - [X] Allow users to create custom Wordle games with their own words
 - [X] Make a cool - albeit completely ornamental - loading screen
+- [X] Wordle Hints
+- [ ] Spelling Bee Letters Reshuffle
 - [ ] Multi-language support
     - [ ] German
     - [ ] Italian
-- [X] Wordle Hints
-- [ ] Spelling Bee Letters Reshuffle
 
 ## Creator Information
 Made by Evan Ho
