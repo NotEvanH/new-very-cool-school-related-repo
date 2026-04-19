@@ -40,7 +40,7 @@ def get_achievements() -> list:
     
     return []
 
-def update_achievements(states: list, user_guesses: list) -> list:
+def update_achievements(states: list, user_guesses: list, won: bool) -> list:
     data = _read_json_file(FILEPATH)
 
     if not states:
@@ -50,15 +50,16 @@ def update_achievements(states: list, user_guesses: list) -> list:
     if all([state == "grey" for state in states]) and not data["born_under_an_unlucky_star"]["achieved"]:
         achievements.append("Born Under An Unlucky Star")
     
-    if all([state != "yellow" for state in states]) and not data["green_day"]["achieved"]:
-        achievements.append("Green Day")
-    
-    if len(user_guesses) == 1 and not data["luck_of_the_draw"]["achieved"]:
-        achievements.append("Luck Of The Draw")
-    
-    if len(user_guesses) == 2 and not data["spare"]["achieved"]:
-        achievements.append("Spare")
-    
+    if won:
+        if all([state != "yellow" for state in states]) and not data["green_day"]["achieved"]:
+            achievements.append("Green Day")
+        
+        if len(user_guesses) == 1 and not data["luck_of_the_draw"]["achieved"]:
+            achievements.append("Luck Of The Draw")
+        
+        if len(user_guesses) == 2 and not data["spare"]["achieved"]:
+            achievements.append("Spare")
+        
     data = _read_json_file(FILEPATH)
     for achievement in achievements:
         data[achievement.replace(" ", "_").lower()]["achieved"] = True
@@ -75,3 +76,4 @@ def quitter_achievement() -> None:
 
             _write_json_file(FILEPATH, new_data)
             print(f"{GREEN}Achievement Unlocked: Quitter Boy{RESET}")
+            print(f"{GREEN} - {new_data["quitter_boy"]["description"]}{RESET}")

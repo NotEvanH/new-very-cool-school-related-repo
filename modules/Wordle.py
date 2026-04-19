@@ -313,6 +313,7 @@ def init() -> None:
 
     valid_words = _load_words()
     random_word = _generate_random_word(valid_words)
+    print(random_word)
     success, round = _get_user_guesses(random_word, valid_words, False)
 
     winstreak = ManageData.get_value("wordle", "winstreak")
@@ -324,11 +325,11 @@ def init() -> None:
         for state in letter_states.values():
             states.append(state)
 
-    achievements = AchievementHandler.update_achievements(states, user_guesses)
-    if len(achievements) == 1:
-        print(f"{GREEN}Achievement Unlocked: {achievements[0]}{RESET}")
-    elif len(achievements) > 1:
-        print(f"{GREEN}Achievements Unlocked: {", ".join([achievement for achievement in achievements])}{RESET}")
+    achievements = AchievementHandler.update_achievements(states, user_guesses, success)
+    data = AchievementHandler._read_json_file(AchievementHandler.FILEPATH)
+    for achievement in achievements:
+        print(f"{GREEN}Achievement Unlocked: {achievement}{RESET}")
+        print(f"{GREEN} - {data[achievement.replace(" ", "_").lower()]["description"]}")
 
     if not success:
         print(f"{RED}You lose! The word was {random_word}.{RESET}")
