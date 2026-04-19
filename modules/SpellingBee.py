@@ -5,6 +5,7 @@ import shutil
 import math
 from modules.ColourCodes import Colours
 import modules.ManageData as ManageData
+import modules.AchievementHandler as AchievementHandler
 
 RED = Colours["Red"]
 BLUE = Colours["Blue"]
@@ -105,6 +106,7 @@ def init() -> None:
         user_input = sys.stdin.readline().strip()
 
         if user_input == "-1":
+            AchievementHandler.quitter_achievement()
             success_score = ManageData.write_value("spelling_bee", "most_recent_score", f"{points}")
             success_past_scores = ManageData.update_past_scores("spelling_bee", f"{points}")
 

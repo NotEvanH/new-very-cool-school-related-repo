@@ -3,6 +3,7 @@ import base64
 import zlib
 import json
 import modules.ManageData as ManageData
+import modules.AchievementHandler as AchievementHandler
 from modules.ColourCodes import Colours
 
 random_word = None # Randomly selected Wordle word will be assigned to this global variable. I wasn't allowed to use a class here, but if I could I would
@@ -186,6 +187,7 @@ def _get_user_guesses(word: str, valid_words: list, is_custom_game: bool) -> tup
                     raise Exception
                 
                 if user_input == "-1":
+                    AchievementHandler.quitter_achievement()
                     should_quit = True
                     break
 
@@ -270,12 +272,14 @@ def get_letter_colours(line: list, word: str, letter_states: dict) -> tuple[list
 def create_wordle_game() -> None:  
     custom_word = input(f"{BLUE}Enter your custom word: {RESET}")
     if custom_word == "-1":
-            return
+        AchievementHandler.quitter_achievement()
+        return
     
     while len(custom_word) != 5:
         print(f"{RED}[ERROR] Word must be at least five letters long.{RESET}")
         custom_word = input(f"{BLUE}Enter your custom word: {RESET}")
         if custom_word == "-1":
+            AchievementHandler.quitter_achievement()
             return
     
     game_code = _create_game_code(custom_word)
@@ -286,6 +290,7 @@ def play_custom_wordle_game() -> None:
     print(f"{BLUE}Please note that custom games will award you no points.{RESET}")
     code = input(f"{BLUE}Enter enter the custom code: {RESET}")
     if code == "-1":
+        AchievementHandler.quitter_achievement()
         return
     
     try:
@@ -307,11 +312,23 @@ def init() -> None:
     global user_guesses
 
     valid_words = _load_words()
-    random_word = _generate_random_word(valid_words)   
+    random_word = _generate_random_word(valid_words)
     success, round = _get_user_guesses(random_word, valid_words, False)
 
     winstreak = ManageData.get_value("wordle", "winstreak")
     highest_winstreak = ManageData.get_value("wordle", "highest_winstreak")
+
+    states = []
+    for guess in user_guesses:
+        _, letter_states = get_letter_colours(list(guess), random_word, {})
+        for state in letter_states.values():
+            states.append(state)
+
+    achievements = AchievementHandler.update_achievements(states, user_guesses)
+    if len(achievements) == 1:
+        print(f"{GREEN}Achievement Unlocked: {achievements[0]}{RESET}")
+    elif len(achievements) > 1:
+        print(f"{GREEN}Achievements Unlocked: {", ".join([achievement for achievement in achievements])}{RESET}")
 
     if not success:
         print(f"{RED}You lose! The word was {random_word}.{RESET}")

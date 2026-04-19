@@ -3,6 +3,7 @@ import modules.Wordle as Wordle
 import modules.SpellingBee as SpellingBee
 import modules.ManageData as ManageData
 import modules.LoadingScreen as LoadingScreen
+import modules.AchievementHandler as AchievementHandler
 from modules.ColourCodes import Colours
 import random
 import signal
@@ -67,6 +68,11 @@ def show_scores() -> None:
     # Calls output_game_scores function for both Spelling Bee and Wordle
     output_game_scores("spelling_bee")
     output_game_scores("wordle")
+
+    print()
+
+    achievements = AchievementHandler.get_achievements()
+    print(f"{GREEN}Achievements: {", ".join([achievement for achievement in achievements]) or "N/A"}{RESET}")
 
     # Basic input function that prompts the user to click return to continue. Program flow is stopped by the input function until the user clicks enter
     input(f"{GREEN}\nPress 'return' to continue.{RESET}")

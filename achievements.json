@@ -1,0 +1,22 @@
+{
+    "born_under_an_unlucky_star": {
+        "achieved": false,
+        "description": "Didn't get a single correct letter in Wordle."
+    },
+    "luck_of_the_draw": {
+        "achieved": false,
+        "description": "Won Wordle on the first guess."
+    },
+    "quitter_boy": {
+        "achieved": false,
+        "description": "In the words of Mr. Thai from The Simpsons 'You quitter! Quitter boy, Quitter boy!'"
+    },
+    "green_day": {
+        "achieved": false,
+        "description": "I bet you don't feel like you're walking down a Boulevard of Broken Dreams because you solved Wordle with only greens."
+    },
+    "spare": {
+        "achieved": false,
+        "description": "Won Wordle in two guesses."
+    }
+}
