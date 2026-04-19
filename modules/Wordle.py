@@ -313,7 +313,6 @@ def init() -> None:
 
     valid_words = _load_words()
     random_word = _generate_random_word(valid_words)
-    print(random_word)
     success, round = _get_user_guesses(random_word, valid_words, False)
 
     winstreak = ManageData.get_value("wordle", "winstreak")
