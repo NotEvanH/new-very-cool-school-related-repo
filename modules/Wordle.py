@@ -169,6 +169,8 @@ def _get_user_guesses(word: str, valid_words: list, is_custom_game: bool) -> tup
 
     can_use_hint = True
 
+    print(f"{GREEN}If you're in need of a hint, type '-2'. You get one hint per game.{RESET}")
+
     for round in range(0, guesses):
         user_input = None
         should_quit = False
@@ -298,14 +300,14 @@ def play_custom_wordle_game() -> None:
         unencrypted_code = _xor(decoded_code, SECRET_KEY)
         decompressed = zlib.decompress(unencrypted_code).decode()
         decoded_code = json.loads(decompressed)
+        word = decoded_code["word"]
+
+        success = _get_user_guesses(word, valid_words, True)
+
+        if not success:
+            print(f"{RED}You lose! The word was {word}.{RESET}")
     except:
         print(f"{RED}[ERROR] Please enter a valid code.{RESET}")
-
-    word = decoded_code["word"]
-    success = _get_user_guesses(word, valid_words, True)
-
-    if not success:
-        print(f"{RED}You lose! The word was {word}.{RESET}")
 
 def init() -> None:
     global random_word
