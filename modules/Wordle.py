@@ -117,57 +117,58 @@ def _load_keyboard(letter_states: dict) -> None:
         for letter in layer:
             letter_state = None
             if letter in letter_states:
-                letter_state = letter_states[letter]
+                letter_state = letter_states[letter] # Configure letter_states based on user guesses
 
             print(
                 f"{"".join(
                     [f"""{f"{WORDLE_GREEN}{letter}{RESET}" if letter_state == "green" else f"{WORDLE_YELLOW}{letter}{RESET}" if letter_state == "yellow" else f"{KEYBOARD_DARK_GREY}{letter}{RESET}" if letter_state == "grey" else f"{WORDLE_GREY}{letter}{RESET}"}"""]
                 )}",
                 end=""
-            )
+            ) # Big print statement
 
-        print()
+        print() # Newline
 
 def _load_words() -> list:
     try:
         with open(VALID_WORD_LIST_PATH, "r") as f:
             valid_words = f.readlines()
-            valid_words = [word.strip() for word in valid_words]
+            valid_words = [word.strip() for word in valid_words] # Get valid words
         
         return valid_words
     except FileNotFoundError:
         print(f"{RED}[ERROR] File not found: resorting to default word{RESET}")
-        valid_words = ["apple"]
+        valid_words = ["apple"] # Failsafe in case of error
         return valid_words
 
 def _generate_random_word(valid_words: list) -> str:
-    word = random.choice(valid_words)
+    word = random.choice(valid_words) # Getting random word
     return word
     
 def _make_guess(solution: str, guess: str) -> bool:
-    return solution == guess
+    return solution == guess # Pretty self-explainatory
 
 def _xor(data: str, key: str):
     return bytes([letter ^ ord(key[i % len(key)]) for i, letter in enumerate(data)])
 
 def _create_game_code(word: str):
-    data = {"word": word}
-    json_data = json.dumps(data).encode()
-    compressed_data = zlib.compress(json_data)
-    encrypted = _xor(compressed_data, SECRET_KEY)
+    data = {"word": word} # Game data: current just a Python dictionary
+    json_data = json.dumps(data).encode() # Make it JSON
+    compressed_data = zlib.compress(json_data) # Compress it with built-in library zlib
+    encrypted = _xor(compressed_data, SECRET_KEY) # Given it some basic encryption
 
-    code = base64.urlsafe_b64encode(encrypted).decode()
+    code = base64.urlsafe_b64encode(encrypted).decode() # Final Base64 encoded data that can be interpreted in the play_custom_wordle_game() function
 
-    return code
+    return code # Return code
 
+# This is an important function
 def _get_user_guesses(word: str, valid_words: list, is_custom_game: bool) -> tuple[bool, int]:
-    lines = [[""] * 5 for _ in range(0, 6)]
-    letter_states = {}
+    lines = [[""] * 5 for _ in range(0, 6)] # Generate a Wordle board using Python lists
+    letter_states = {} # Dictionary to store the states (i.e. colours) of letters in the user's guess
 
-    generate_wordle_board(lines, word, letter_states)
-    _load_keyboard(letter_states)
+    generate_wordle_board(lines, word, letter_states) # Generate board
+    _load_keyboard(letter_states) # Load keyboard
 
-    can_use_hint = True
+    can_use_hint = True # Guess this variable signifies? You'll never guess it.
 
     print(f"{GREEN}If you're in need of a hint, type '-2'. You get one hint per game.{RESET}")
 
@@ -176,28 +177,29 @@ def _get_user_guesses(word: str, valid_words: list, is_custom_game: bool) -> tup
         should_quit = False
         while user_input == None:
             try:
-                user_input = input(f"{BLUE}Enter thine guess: {RESET}").lower()
+                user_input = input(f"{BLUE}Enter thine guess: {RESET}").lower() # Get user input
                     
-                if user_input == "-2" and can_use_hint:
+                if user_input == "-2" and can_use_hint: # Gib them a hint if they can have one
                     can_use_hint = False
                     hint = _get_hint(word)
                     print(f"{GREEN}Revealed Letter: {hint}{RESET}")
 
                     user_input = input(f"{BLUE}Enter thine guess: {RESET}").lower()
                 
-                if user_input == "-2":
+                if user_input == "-2": # If they try to request another hint, decline them
                     raise Exception
                 
-                if user_input == "-1":
-                    AchievementHandler.quitter_achievement()
+                if user_input == "-1": # -1 is for when a user quits
+                    AchievementHandler.quitter_achievement() # Give them the quitter achievement
                     should_quit = True
-                    break
+                    break # Break the loop
 
-                if len(user_input) != 5:
+                if len(user_input) != 5: # If user input is more than five characters, raise a ValueError because that's no good in Wordle
                     raise ValueError
                 
-                if not is_custom_game and not (user_input in valid_words):
+                if not is_custom_game and not (user_input in valid_words): # If the user input doesn't exist in the ValidWords.txt list, we decline them. This prevents inputs like "AEIOU" that could be used to discover letters.
                     raise ValueError
+            # Below are polite, constructive error messages.
             except ValueError:
                 user_input = None
                 print(f"{RED}[ERROR] Ensure guess is five letters long and word is valid.{RESET}")
@@ -208,33 +210,34 @@ def _get_user_guesses(word: str, valid_words: list, is_custom_game: bool) -> tup
         if should_quit == True:
             break
 
-        lines[round] = list(user_input)
-        generate_wordle_board(lines, word, letter_states)
-        _, letter_states = get_letter_colours(user_input, word, letter_states)
-        _load_keyboard(letter_states)
+        lines[round] = list(user_input) # Set round to the user's guess
+        generate_wordle_board(lines, word, letter_states) # Show Wordle board
+        _, letter_states = get_letter_colours(user_input, word, letter_states) # Get letter states
+        _load_keyboard(letter_states) # Load keyboard again
         
-        correct = _make_guess(word, user_input)
-        user_guesses.append(user_input)
+        correct = _make_guess(word, user_input) # Check if the user's guess was correct
+        user_guesses.append(user_input) # Add user's guess to the list of past guesses
 
         if correct:
-            print(f"{GREEN}You win! The word was {word}.{RESET}")
-            return True, round
+            print(f"{GREEN}You win! The word was {word}.{RESET}") # If it was correct, the user wins. Yay!
+            return True, round # Returns True to signify that the user won and the amount of rounds it took the user to win 
     
     return False, 7
 
 def _get_hint(word: str) -> str:
-    return random.choice(word)
+    return random.choice(word) # Select a random letter in the word as a hint
 
 # EXTERNAL FUNCTIONS
 
 def generate_wordle_board(lines: list, word: str, letter_states: dict) -> None:
-    for line in lines:
-        if not any(line):
+    for line in lines: # Loop through all lines
+        if not any(line): # If there are no lines, print five dashes
             print("-----")
             continue
         
-        result, _ = get_letter_colours(line, word, letter_states)
+        result, _ = get_letter_colours(line, word, letter_states) # Get colours
 
+        # Using ANSI colour codes to print each letter with its appropriate colour
         for i in range(0, 5):
             if result[i] == "green":
                 print(f"{WORDLE_GREEN}{line[i]}{RESET}", end="")
@@ -242,30 +245,33 @@ def generate_wordle_board(lines: list, word: str, letter_states: dict) -> None:
                 print(f"{WORDLE_YELLOW}{line[i]}{RESET}", end="")
             else:
                 print(f"{WORDLE_GREY}{line[i]}{RESET}", end="")
-        print()
+        print() # New line
 
 def get_letter_colours(line: list, word: str, letter_states: dict) -> tuple[list, dict]:
-    result = [""] * 5
+    result = [""] * 5 # Generate a list like this ["", "", "", "", ""]
+
+    # Storing how many times each letter is included
     letter_count = {}
     for letter in word:
         if letter in letter_count:
             letter_count[letter] += 1
         else:
             letter_count[letter] = 1
-        
+
+    # Loop through each letter    
     for i in range(0, 5):
-        if line[i] == word[i]:
+        if line[i] == word[i]: # If letters in the user's guess and the correct word align, it is green
             result[i] = "green"
             letter_count[line[i]] -= 1
             letter_states[line[i]] = "green"
         
     for i in range(0, 5):
         if result[i] == "":
-            if line[i] in letter_count and letter_count[line[i]] > 0:
+            if line[i] in letter_count and letter_count[line[i]] > 0: # Alternatively, if the word includes the letter and it hasn't already been counter, it's yellow
                 result[i] = "yellow"
                 letter_count[line[i]] -= 1
                 letter_states[line[i]] = "yellow"
-            else:
+            else: # Otherwise, it's grey
                 result[i] = "grey"
                 letter_states[line[i]] = "grey"
     
@@ -277,6 +283,7 @@ def create_wordle_game() -> None:
         AchievementHandler.quitter_achievement()
         return
     
+    # Ensures custom word is equal five characters
     while len(custom_word) != 5:
         print(f"{RED}[ERROR] Word must be at least five letters long.{RESET}")
         custom_word = input(f"{BLUE}Enter your custom word: {RESET}")
@@ -285,7 +292,7 @@ def create_wordle_game() -> None:
             return
     
     game_code = _create_game_code(custom_word)
-    print(f"{GREEN}Share this code with your friends for them to play: {game_code}{RESET}")
+    print(f"{GREEN}Share this code with your friends for them to play: {game_code}{RESET}") # Output code
 
 def play_custom_wordle_game() -> None:
     valid_words = _load_words()
@@ -295,6 +302,7 @@ def play_custom_wordle_game() -> None:
         AchievementHandler.quitter_achievement()
         return
     
+    # Decode code to get word
     try:
         decoded_code = base64.urlsafe_b64decode(code)
         unencrypted_code = _xor(decoded_code, SECRET_KEY)
@@ -302,12 +310,12 @@ def play_custom_wordle_game() -> None:
         decoded_code = json.loads(decompressed)
         word = decoded_code["word"]
 
-        success = _get_user_guesses(word, valid_words, True)
+        success = _get_user_guesses(word, valid_words, True) # Once decoded, game is player
 
         if not success:
             print(f"{RED}You lose! The word was {word}.{RESET}")
     except:
-        print(f"{RED}[ERROR] Please enter a valid code.{RESET}")
+        print(f"{RED}[ERROR] Please enter a valid code.{RESET}") # Input validation
 
 def init() -> None:
     global random_word
@@ -320,44 +328,52 @@ def init() -> None:
     winstreak = ManageData.get_value("wordle", "winstreak")
     highest_winstreak = ManageData.get_value("wordle", "highest_winstreak")
 
+    # Load letter states to be used by achievements function
     states = []
     for guess in user_guesses:
         _, letter_states = get_letter_colours(list(guess), random_word, {})
         for state in letter_states.values():
             states.append(state)
 
+    # Let the user know if they accomplished any achievements
     achievements = AchievementHandler.update_achievements(states, user_guesses, success)
     data = AchievementHandler._read_json_file(AchievementHandler.FILEPATH)
     for achievement in achievements:
         print(f"{GREEN}Achievement Unlocked: {achievement}{RESET}")
         print(f"{GREEN} - {data[achievement.replace(" ", "_").lower()]["description"]}")
 
+    # If user lost
     if not success:
-        print(f"{RED}You lose! The word was {random_word}.{RESET}")
+        print(f"{RED}You lose! The word was {random_word}.{RESET}") # Tell them what the correct word would have been
+
+        # Score set to seven upon failure (real NYTimes Games do this too)
         success_score = ManageData.write_value("wordle", "most_recent_score", "7")
         success_past_scores = ManageData.update_past_scores("wordle", "7")
-        success_winstreak = ManageData.write_value("wordle", "winstreak", 0)
+
+        success_winstreak = ManageData.write_value("wordle", "winstreak", 0) # Winstreak reset
 
         if not success_past_scores or not success_score or not success_winstreak:
             print(f"{RED}[ERROR] Could not save score to file.{RESET}")
 
-        if winstreak > highest_winstreak:
+        if winstreak > highest_winstreak: # Check if current winstreak is greater than highest winstreak
             if not ManageData.write_value("wordle", "highest_winstreak", winstreak):
                 print(f"{RED}[ERROR] Could not save score to file.{RESET}")
-    else:
+    else: # If the won
         success_score = ManageData.write_value("wordle", "most_recent_score", f"{round + 1}/6")
         success_past_scores = ManageData.update_past_scores("wordle", f"{round + 1}")
-        success_winstreak = ManageData.write_value("wordle", "winstreak", winstreak + 1)
+        success_winstreak = ManageData.write_value("wordle", "winstreak", winstreak + 1) # Increment winstreak
 
         if not success_past_scores or not success_score:
             print(f"{RED}[ERROR] Could not save score to file.{RESET}")
         
-        if int(winstreak + 1) >= int(highest_winstreak):
+        if int(winstreak + 1) >= int(highest_winstreak): # Check if current winstreak is greater than highest winstreak
             if not ManageData.write_value("wordle", "highest_winstreak", winstreak + 1):
                 print(f"{RED}[ERROR] Could not save score to file.{RESET}")
     
+    # Wordle Bot
     do_wordle_bot = input(f"{BLUE}Did you beat the bot? Press 'b' to see. {RESET}").lower() == "b"
     if do_wordle_bot:
         _init_wordle_bot(valid_words)
     
+    # Reset user_guesses variable to empty list for next game
     user_guesses = []
