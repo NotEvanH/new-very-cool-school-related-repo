@@ -1,3 +1,4 @@
+# Colours.
 Colours: dict = {
     "Red": "\033[1;31m",
     "Blue": "\033[0;34m",
